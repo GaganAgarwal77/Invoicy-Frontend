@@ -12,25 +12,8 @@ class Landing extends React.Component {
 
     constructor (props) {
         super(props);
-        this.state = {wallet: '', companyId: 0};
     }
 
-    async loginHandler (event) {
-        await loadWeb3();
-        const account = await loadAccount();
-        this.setState({wallet: account});
-        const companyId = await getCompanyId();
-        if(companyId > 0) {
-            this.setState({companyId: companyId});
-            this.props.history.push({
-                pathname: '/dashboard/',
-                state: { wallet: this.state.wallet, companyId: this.state.companyId }
-            })
-        }
-        else {
-            this.dialog.showAlert('Please register your company first or connnect with other wallet address.');
-        }
-    }
     render () {
         return(
             <Aux>
@@ -54,7 +37,10 @@ class Landing extends React.Component {
                                     style={{color: 'white', fontWeight: 'normal'}}>
                                     Sign up
                                 </Link>
-                                <button className="btn btn-primary shadow-2 mb-4" onClick={this.loginHandler.bind(this)}>Login</button>
+                                <Link to="/signin" className="btn btn-primary shadow-2 mb-4" 
+                                    style={{color: 'white', fontWeight: 'normal'}}>
+                                    Sign in
+                                </Link>
                                 <Dialog ref={(component) => { this.dialog = component }} />
                             </div>
                         </div>

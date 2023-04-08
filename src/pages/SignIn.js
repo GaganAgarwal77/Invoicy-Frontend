@@ -9,22 +9,20 @@ import ApiService from '../services/ApiService';
 class SignUp extends React.Component {
     constructor (props) {
         super(props);
-        this.state = {email: '', name: '', password: '', username: ''};
+        this.state = {password: '', username: ''};
     }
-    async signupHandler(event) {
+    async signinHandler(event) {
         event.preventDefault();
         const data = {
-            "company_name": this.state.name,
             "username": this.state.username,
-            "email": this.state.email,
             "password": this.state.password
         }
-        ApiService.post('/register/', data)
+        ApiService.post('/login/', data)
         .then(res => {
             console.log(res);
             window.localStorage.setItem('token', res.data.token);
-            window.localStorage.setItem('id', res.data.id);
-            this.setState({ message: 'User added successfully.' });
+            window.localStorage.setItem('id', res.data.user_id);
+            this.setState({ message: 'User logged in successfully.' });
             this.props.history.push('/dashboard');
         }).catch((error) => {
             console.log(error.response)
@@ -60,27 +58,16 @@ class SignUp extends React.Component {
                                 <div className="mb-4">
                                     <i className="feather icon-user-plus auth-icon"/>
                                 </div>
-                                <h3 className="mb-4">Sign up</h3>
-                                <div className="input-group mb-3">
-                                    <input type="text" className="form-control" placeholder="Company Name"  value={this.state.name} onChange={e => {this.handleChange("name", e.target.value)}}/>
-                                </div>
+                                <h3 className="mb-4">Sign in</h3>
+
                                 <div className="input-group mb-3">
                                     <input type="text" className="form-control" placeholder="Username"  value={this.state.username} onChange={e => {this.handleChange("username", e.target.value)}}/>
                                 </div>
-                                <div className="input-group mb-3">
-                                    <input type="email" className="form-control" placeholder="Company Email"  value={this.state.email} onChange={e => {this.handleChange("email", e.target.value)}}/>
+                                <div className="input-group mb-4">
+                                    <input type="password" className="form-control" placeholder="Password"  value={this.state.password} onChange={e => {this.handleChange("password", e.target.value)}}/>
                                 </div>
-                                    <div className="input-group mb-4">
-                                        <input type="password" className="form-control" placeholder="Password"  value={this.state.password} onChange={e => {this.handleChange("password", e.target.value)}}/>
-                                    </div>
-                                {/* <div className="form-group text-left">
-                                    <div className="checkbox checkbox-fill d-inline">
-                                        <input type="checkbox" name="checkbox-fill-2" id="checkbox-fill-2"/>
-                                            <label htmlFor="checkbox-fill-2" className="cr">Checkbox </label>
-                                    </div>
-                                </div> */}
-                                <button className="btn btn-primary shadow-2 mb-4" onClick={this.signupHandler.bind(this)}>Sign up</button>
-                                <p className="mb-0 text-muted">Already have an account? <NavLink to="/">Login</NavLink></p>
+                                <button className="btn btn-primary shadow-2 mb-4" onClick={this.signinHandler.bind(this)}>Sign in</button>
+                                <p className="mb-0 text-muted">Don't have an account? <NavLink to="/signup">Sign Up</NavLink></p>
                             </div>
                         </div>
                     </div>
