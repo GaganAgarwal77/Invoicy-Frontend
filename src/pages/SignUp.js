@@ -23,7 +23,8 @@ class SignUp extends React.Component {
         .then(res => {
             console.log(res);
             window.localStorage.setItem('token', res.data.token);
-            window.localStorage.setItem('id', res.data.id);
+            window.localStorage.setItem('user_id', res.data.id);
+            window.localStorage.setItem('username', res.data.username);
             this.setState({ message: 'User added successfully.' });
             this.props.history.push('/dashboard');
         }).catch((error) => {
@@ -80,7 +81,7 @@ class SignUp extends React.Component {
                                     </div>
                                 </div> */}
                                 <button className="btn btn-primary shadow-2 mb-4" onClick={this.signupHandler.bind(this)}>Sign up</button>
-                                <p className="mb-0 text-muted">Already have an account? <NavLink to="/">Login</NavLink></p>
+                                <p className="mb-0 text-muted">Already have an account? <NavLink to="/signin">Login</NavLink></p>
                             </div>
                         </div>
                     </div>

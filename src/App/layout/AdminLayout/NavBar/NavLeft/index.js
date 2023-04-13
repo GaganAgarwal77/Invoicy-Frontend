@@ -6,22 +6,15 @@ import windowSize from 'react-window-size';
 import Aux from "../../../../../hoc/_Aux";
 import DEMO from "../../../../../store/constant";
 import * as actionTypes from "../../../../../store/actions";
-import {loadWeb3, loadAccount} from "../../../../../services/web3";
 
 
 class NavLeft extends Component {
 
     constructor(props){
         super(props);
-        this.state = {wallet: ''};
-        this.fetchAccount();
+        this.state = {wallet: window.localStorage.getItem("token")};
     }
 
-    async fetchAccount(){
-        await loadWeb3();
-        const account = await loadAccount();
-        this.setState({wallet: account});
-    }
 
     render() {
         let iconFullScreen = ['feather'];

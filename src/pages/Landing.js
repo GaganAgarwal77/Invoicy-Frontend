@@ -4,8 +4,6 @@ import {Link} from 'react-router-dom';
 import '../assets/scss/style.scss';
 import Aux from "../hoc/_Aux";
 import Breadcrumb from "../App/layout/AdminLayout/Breadcrumb";
-import {loadWeb3, loadAccount, getCompanyId} from "../services/web3";
-//https://www.npmjs.com/package/react-bootstrap-dialog
 import Dialog from 'react-bootstrap-dialog';
 
 class Landing extends React.Component {

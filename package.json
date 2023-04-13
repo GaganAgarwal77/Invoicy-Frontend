@@ -21,7 +21,7 @@
     "prop-types": "^15.7.2",
     "rc-slider": "^9.7.5",
     "react": "^16.8.4",
-    "react-bootstrap": "^1.0.0-beta.5",
+    "react-bootstrap": "^1.6.6",
     "react-bootstrap-dialog": "^0.13.0",
     "react-bootstrap-range-slider": "^2.0.2",
     "react-datepicker": "^4.6.0",

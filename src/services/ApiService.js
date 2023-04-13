@@ -3,22 +3,16 @@ import axios from 'axios';
 const API_BASE_URL = 'http://localhost:8000';
 class ApiService {
 
-    getAllDatas(url) {
-        return axios.get(API_BASE_URL + url);
-    }
-    getAll(url) {
-        return axios.get(API_BASE_URL + url);
-    }
-    getOneById(url) {
+
+    get(url) {
         return axios.get(API_BASE_URL + url);
     }
 
-    // fetchPatientByEmail(email) {
-    //     return axios.get(USER_API_BASE_URL + '/find-by-email/' + email);
-    // }
-
-    deleteById(url) {
-        return axios.delete(API_BASE_URL + url);
+    getAuth(url,  token) {
+        return axios.get(API_BASE_URL + url,
+            { headers: {
+                Authorization: 'Token ' + token}
+            });
     }
 
     post(url, data) { 
@@ -28,7 +22,7 @@ class ApiService {
     postAuth(url, data, token) {
         return axios.post(API_BASE_URL + url, data, 
             { headers: {
-                Authorization: 'Bearer ' + token}
+                Authorization: 'Token ' + token}
             });
     }
 
@@ -36,6 +30,17 @@ class ApiService {
         return axios.put(API_BASE_URL + url, data);
     }
 
+
+    patchAuth(url, data, token) {
+        return axios.patch(API_BASE_URL + url, data, 
+            { headers: {
+                Authorization: 'Token ' + token}
+            });
+    }
+
+    delete(url) {
+        return axios.delete(API_BASE_URL + url);
+    }
 }
 
 export default new ApiService();

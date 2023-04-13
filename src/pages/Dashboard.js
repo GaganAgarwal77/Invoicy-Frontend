@@ -7,11 +7,9 @@ import Aux from "../hoc/_Aux";
 
 import avatar2 from '../assets/images/user/avatar-2.jpg';
 
-import {loadWeb3, loadAccount, getCompanyId, getInvoiceDetails,
-        web3, getAllClients, getCompanyById, getAllInvoicesByClient,updateInvoiceWorkCompletedStatus} from "../services/web3";
-
 import NVD3Chart from 'react-nvd3';
 import Dialog from 'react-bootstrap-dialog';
+import ApiService from '../services/ApiService';
 
 
 const pieChartData = [
@@ -54,51 +52,46 @@ class Dashboard extends React.Component {
 
     constructor (props) {
         super(props);        
-        this.state = {wallet: '', companyId: 0, clients: [], topInvoices: [], isBlockedClientsCollapsed: false};
-        this.fetchAccount();
-    }
-
-    async fetchAccount(){
-        await loadWeb3();
-        const account = await loadAccount();
-        this.setState({wallet: account});
-        const companyId = await getCompanyId();
-        if(companyId > 0) {
-            this.setState({companyId: companyId});
-        }
-        else{
-            this.props.history.push('/');
-        }
+        this.state = {
+          companyId: window.localStorage.getItem("user_id"),
+          clients: [],
+          topInvoices: [],
+          isBlockedClientsCollapsed: false,
+        };
     }
 
     /*Set both clients and topInvoices state vars*/
     async getClients(){
-        await this.fetchAccount();
         const currentCompanyId = this.state.companyId;
         try{
-            const clients = await getAllClients();
+            let res1 = await ApiService.getAuth('/fetch-clients/', window.localStorage.getItem("token"));
+            const clients = res1.data;
+            console.log(clients);
             clients.forEach(async client => {
-                const companyId = await getCompanyId(client.clientAddr);
-                const company = await getCompanyById(companyId);
-
-                const ids = await getAllInvoicesByClient(currentCompanyId, client.clientId);
-                ids.forEach(async id => {
-                    const data = await getInvoiceDetails(id);
-                    const invoice = {'id': id, 'data': data}
+                const companyId = client.client
+                let res2 = await ApiService.getAuth(`/users/id/${companyId}/`, window.localStorage.getItem("token"));
+                const company = res2.data;
+                console.log(company);
+                let res3 = await ApiService.getAuth(`/client-invoice/${companyId}/`, window.localStorage.getItem("token"));
+                const invoices = res3.data;
+                console.log(invoices);
+                invoices.forEach(invoice => {
+                    invoice = {...invoice, 'clientName': company.company_name, 'clientEmail': company.email }
                     this.setState({
                         topInvoices:[...this.state.topInvoices, invoice]
                     });
                 })
 
                 const data = {
-                    "clientId" : client.clientId,
-                    "clientAddr" : client.clientAddr,
-                    "isBlocked" : client.isBlocked,
+                    "clientId" : client.client,
+                    "blocked" : client.blocked,
                     "discount" : client.discount,
-                    "name" : company.name,
-                    "numInvoices": ids.length,
+                    "name" : company.company_name,
+                    "numInvoices": invoices.length,
+                    "email": company.email,
+                    "username" : company.username,
                 }
-                const newClient = {'id': client.clientId, 'data': data}
+                const newClient = {'id': client.client, 'data': data}
                 this.setState({
                     clients: [...this.state.clients, newClient]
                 });
@@ -116,8 +109,8 @@ class Dashboard extends React.Component {
     }  
 
     compareFilterTopInvoices(a, b){
-        if(a.data.payment.dueAmount < b.data.payment.dueAmount) return 1;
-        if(a.data.payment.dueAmount > b.data.payment.dueAmount) return -1;
+        if(a.dueAmount < b.dueAmount) return 1;
+        if(a.dueAmount > b.dueAmount) return -1;
         return 0;
     }
 
@@ -135,7 +128,8 @@ class Dashboard extends React.Component {
         })
     }
     async updateWorkStatus(invoiceId) {
-        const result = await updateInvoiceWorkCompletedStatus(invoiceId);
+        const result = await ApiService.patchAuth(`/invoice/${invoiceId}/`, {workCompleted: "true", note: "some note"}, window.localStorage.getItem("token"));
+        console.log(result)
         if(result) {
             this.dialog.showAlert('Success!');
             window.location.reload();
@@ -157,39 +151,39 @@ class Dashboard extends React.Component {
                 <tr className="unread" key = {invoice.id}>
                     <td><img className="rounded-circle" style={{width: '40px'}} src={avatar2} alt="activity-user"/></td>
                     <td>
-                        <h6 className="mb-1">{invoice.data.client.name}</h6>
-                        <p className="m-0">{invoice.data.client.email}</p>
+                        <h6 className="mb-1">{invoice.clientName}</h6>
+                        <p className="m-0">{invoice.clientEmail}</p>
                     </td>
                     <td>
-                        <h6 className="text-muted"><i className="fa fa-circle text-c-green f-10 m-r-15"/>{invoice.data.invoiceDate}</h6>
+                        <h6 className="text-muted"><i className="fa fa-circle text-c-green f-10 m-r-15"/>{invoice.invoiceDate}</h6>
                     </td>
                     <td>
-                        <h6 className="text-muted"><i className="fa fa-circle text-c-red f-10 m-r-15"/>{invoice.data.dueDate}</h6>
+                        <h6 className="text-muted"><i className="fa fa-circle text-c-red f-10 m-r-15"/>{invoice.dueDate}</h6>
                     </td>
                     <td>
                         <h6 className="text-muted">Work Status: &nbsp; 
                         {
-                            invoice.data.workCompleted &&
+                            invoice.workCompleted &&
                             <span className="text-success">Completed</span>
                         }
                         {
-                            !invoice.data.workCompleted &&
+                            !invoice.workCompleted &&
                             <span className="text-danger">Not Completed</span>
                         }
                         </h6>
                     </td>
                     <td>
-                        <h6 className="text-muted">{parseFloat(web3.utils.fromWei(invoice.data.payment.dueAmount)).toFixed(2)} ETH due</h6>
+                        <h6 className="text-muted">{invoice.dueAmount} due</h6>
                     </td>
                     <td>
                         <button style={{border: 0}} onClick={() => this.viewDetails(invoice)} className="label theme-bg2 text-white f-12">View Details</button>
                         <button style={{border: 0}} onClick={() => this.updateWorkStatus(invoice.id)} className="label theme-bg text-white f-12">
                             {
-                                !invoice.data.workCompleted &&
+                                !invoice.workCompleted &&
                                 "Update Progress"
                             }
                             {
-                                invoice.data.workCompleted &&
+                                invoice.workCompleted &&
                                 "Delete Progress"
                             }                            
                         </button>
@@ -201,13 +195,21 @@ class Dashboard extends React.Component {
         })
 
         this.state.clients.forEach(client => {
-            if(!client.data.isBlocked) {
+            if(!client.data.blocked) {
                 clients.push(
                 <tr className="unread" key = {client.id}>
                     <td><img className="rounded-circle" style={{width: '40px'}} src={avatar2} alt="activity-user"/></td>
                     <td>
-                        <h6 className="mb-1">{client.data.clientAddr}</h6>
-                        <p className="m-0">{client.data.name}</p>
+                        <p className="m-0">{client.data.username}</p>
+                    </td>
+                    <td>
+                        <p className="m-0">{client.data.company_name}</p>
+                    </td>
+                    <td>
+                        <p className="m-0">{client.data.email}</p>
+                    </td>
+                    <td>
+                        <p className="m-0">Discount: {client.data.discount}%</p>
                     </td>
                     <td>
                         <h6 className="text-muted">{client.data.numInvoices} Invoices</h6>
@@ -223,8 +225,16 @@ class Dashboard extends React.Component {
                 <tr className="unread" key = {client.id}>
                     <td><img className="rounded-circle" style={{width: '40px'}} src={avatar2} alt="activity-user"/></td>
                     <td>
-                        <h6 className="mb-1">{client.data.clientAddr}</h6>
-                        <p className="m-0">{client.data.name}</p>
+                        <p className="m-0">{client.data.username}</p>
+                    </td>
+                    <td>
+                        <p className="m-0">{client.data.company_name}</p>
+                    </td>
+                    <td>
+                        <p className="m-0">{client.data.email}</p>
+                    </td>
+                    <td>
+                        <p className="m-0">{client.data.discount}</p>
                     </td>
                     <td>
                         <h6 className="text-muted">{client.data.numInvoices} Invoices</h6>

@@ -5,10 +5,9 @@ import Aux from "../hoc/_Aux";
 
 import avatar2 from '../assets/images/user/avatar-2.jpg';
 
-import {web3, loadWeb3, loadAccount, getCompanyId, getCompanyById, updateClientBlockedStatus, updateInvoiceWorkCompletedStatus,
-    getAllInvoicesByClient, getInvoiceDetails, getClientbyId, updateClientDiscount} from "../services/web3";
 import Dialog from 'react-bootstrap-dialog';
 import RangeSlider from 'react-bootstrap-range-slider';
+import ApiService from '../services/ApiService';
 
 
 class ClientDashboard extends React.Component {
@@ -16,32 +15,27 @@ class ClientDashboard extends React.Component {
     constructor (props) {
         super(props);      
         this.clientId = this.props.match.params.id;
-        this.state = {wallet: '', companyId: 0, client:{}, invoices: [], discount: 0};
-        this.fetchAccount();
-    }
-
-    async fetchAccount(){
-        await loadWeb3();
-        const account = await loadAccount();
-        this.setState({wallet: account});
-        const companyId = await getCompanyId();
-        if(companyId > 0) {
-            this.setState({companyId: companyId});
-        }
-        else{
-            this.props.history.push('/');
-        }
+        this.state = {
+          clientId: this.props.match.params.id,
+          companyId: window.localStorage.getItem("user_id"),
+          client: {},
+          invoices: [],
+          discount: 0,
+        };
     }
 
     async getInvoices(){
         try{
-            await this.fetchAccount();
-            const ids = await getAllInvoicesByClient(this.state.companyId, this.clientId);
-            ids.forEach(async id => {
-                const data = await getInvoiceDetails(id);
-                const invoice = {'id': id, 'data': data}
+            let res2 = await ApiService.getAuth(`/users/id/${this.state.clientId}/`, window.localStorage.getItem("token"));
+            const client = res2.data;
+            let res3 = await ApiService.getAuth(`/client-invoice/${this.state.clientId}/`, window.localStorage.getItem("token"));
+            const invoices = res3.data;
+            console.log(invoices);
+            invoices.forEach(invoice => {
+                invoice = {...invoice, 'clientName': client.company_name, 'clientEmail': client.email }
                 this.setState({
-                    invoices: [...this.state.invoices, invoice]
+                    client: {...client, 'discount': 25, 'blocked': false},
+                    invoices:[...this.state.invoices, invoice]
                 });
             })
         }catch(e){
@@ -49,57 +43,41 @@ class ClientDashboard extends React.Component {
             }
     }
 
-    async getClientDetails(){
-        try{
-            await this.fetchAccount();
-            const client = await getClientbyId(this.state.companyId, this.clientId);
-            const companyId = await getCompanyId(client.clientAddr);
-            const company = await getCompanyById(companyId);
-            const data = {...client, ...company}
-            this.setState({
-                client: data
-            })
-            this.setState({discount: this.state.client.discount});
-        }catch(e){
-            console.log(e);
-        }
-    }
-
     componentDidMount() {
-        this.getClientDetails();
         this.getInvoices();
     }  
 
     async updateDiscount(discount) {
-        const result = await updateClientDiscount(this.state.companyId, this.clientId, discount);
-        if(result) {
-            this.dialog.showAlert('Success!');
-            this.setState({
-                client: {...this.state.client, 
-                    discount: discount
-                }
-            });
-        }
-        else {
-            this.dialog.showAlert('Something went wrong!');
-        }
+        // const result = await updateClientDiscount(this.state.companyId, this.clientId, discount);
+        // if(result) {
+            this.dialog.showAlert('Waiting');
+        //     this.setState({
+        //         client: {...this.state.client, 
+        //             discount: discount
+        //         }
+        //     });
+        // }
+        // else {
+        //     this.dialog.showAlert('Something went wrong!');
+        // }
     }
 
     async blockClient() {
-        const result = await updateClientBlockedStatus(this.state.companyId, this.clientId);
-        if(result) {
-            this.dialog.showAlert('Success!');
-            this.props.history.push({
-                pathname: '/dashboard'
-            })
-        }
-        else {
-            this.dialog.showAlert('Something went wrong!');
-        }
+        // const result = await updateClientBlockedStatus(this.state.companyId, this.clientId);
+        // if(result) {
+            this.dialog.showAlert('Waiting');
+        //     this.props.history.push({
+        //         pathname: '/dashboard'
+        //     })
+        // }
+        // else {
+        //     this.dialog.showAlert('Something went wrong!');
+        // }
     }
 
     async updateWorkStatus(invoiceId) {
-        const result = await updateInvoiceWorkCompletedStatus(invoiceId);
+        const result = await ApiService.patchAuth(`/invoice/${invoiceId}/`, {workCompleted: "true", note: "some note"}, window.localStorage.getItem("token"));
+        console.log(result)
         if(result) {
             this.dialog.showAlert('Success!');
             window.location.reload();
@@ -121,97 +99,96 @@ class ClientDashboard extends React.Component {
         let completedInvoices = [];
 
         this.state.invoices.forEach(invoice => {
-            if(invoice.data.isSettled){
+            if(invoice.dueAmount == 0){
                 completedInvoices.push(
                     <tr className="unread" key = {invoice.id}>
-                        <td><img className="rounded-circle" style={{width: '40px'}} src={avatar2} alt="activity-user"/></td>
-                        <td>
-                            <h6 className="mb-1">{invoice.data.client.name}</h6>
-                            <p className="m-0">{invoice.data.client.email}</p>
-                        </td>
-                        <td>
-                            <h6 className="text-muted"><i className="fa fa-circle text-c-green f-10 m-r-15"/>{invoice.data.invoiceDate}</h6>
-                        </td>
-                        <td>
-                            <h6 className="text-muted"><i className="fa fa-circle text-c-red f-10 m-r-15"/>{invoice.data.dueDate}</h6>
-                        </td>    
-                        <td>
-                            <h6 className="text-muted">{parseFloat(web3.utils.fromWei(invoice.data.payment.totalAmount)).toFixed(2)} ETH</h6>
-                        </td>
-                        <td>
-                            <h6 className="text-muted">Work Status: &nbsp; 
-                            {
-                                invoice.data.workCompleted &&
-                                <span className="text-success">Completed</span>
-                            }
-                            {
-                                !invoice.data.workCompleted &&
-                                <span className="text-danger">Not Completed</span>
-                            }
-                            </h6>
-                        </td>
-                        <td>
-                        <button style={{border: 0}} onClick={() => this.viewDetails(invoice)} className="label theme-bg text-white f-12">View Details</button>
+                    <td><img className="rounded-circle" style={{width: '40px'}} src={avatar2} alt="activity-user"/></td>
+                    <td>
+                        <h6 className="mb-1">{invoice.clientName}</h6>
+                        <p className="m-0">{invoice.clientEmail}</p>
+                    </td>
+                    <td>
+                        <h6 className="text-muted"><i className="fa fa-circle text-c-green f-10 m-r-15"/>{invoice.invoiceDate}</h6>
+                    </td>
+                    <td>
+                        <h6 className="text-muted"><i className="fa fa-circle text-c-red f-10 m-r-15"/>{invoice.dueDate}</h6>
+                    </td>
+                    <td>
+                        <h6 className="text-muted">Work Status: &nbsp; 
+                        {
+                            invoice.workCompleted &&
+                            <span className="text-success">Completed</span>
+                        }
+                        {
+                            !invoice.workCompleted &&
+                            <span className="text-danger">Not Completed</span>
+                        }
+                        </h6>
+                    </td>
+                    <td>
+                        <h6 className="text-muted">{invoice.totalAmount} INR</h6>
+                    </td>
+                    <td>
+                        <button style={{border: 0}} onClick={() => this.viewDetails(invoice)} className="label theme-bg2 text-white f-12">View Details</button>
                         <button style={{border: 0}} onClick={() => this.updateWorkStatus(invoice.id)} className="label theme-bg text-white f-12">
                             {
-                                !invoice.data.workCompleted &&
+                                !invoice.workCompleted &&
                                 "Update Progress"
                             }
                             {
-                                invoice.data.workCompleted &&
+                                invoice.workCompleted &&
                                 "Delete Progress"
-                            }
+                            }                            
                         </button>
-                        </td>
-                    </tr>
+                    </td>
+                </tr>
                 )
             }
             else{
                 invoices.push(
                     <tr className="unread" key = {invoice.id}>
-                        <td><img className="rounded-circle" style={{width: '40px'}} src={avatar2} alt="activity-user"/></td>
-                        <td>
-                            <h6 className="mb-1">{invoice.data.client.name}</h6>
-                            <p className="m-0">{invoice.data.client.email}</p>
-                        </td>
-                        <td>
-                            <h6 className="text-muted"><i className="fa fa-circle text-c-green f-10 m-r-15"/>{invoice.data.invoiceDate}</h6>
-                        </td>
-                        <td>
-                            <h6 className="text-muted"><i className="fa fa-circle text-c-red f-10 m-r-15"/>{invoice.data.dueDate}</h6>
-                        </td>
-
-                        <td>
-                            <h6 className="text-muted">{parseFloat(web3.utils.fromWei(invoice.data.payment.dueAmount)).toFixed(2)} ETH due</h6>
-                        </td>
-                        <td>
-                            <h6 className="text-muted">Work Status: &nbsp; 
+                    <td><img className="rounded-circle" style={{width: '40px'}} src={avatar2} alt="activity-user"/></td>
+                    <td>
+                        <h6 className="mb-1">{invoice.clientName}</h6>
+                        <p className="m-0">{invoice.clientEmail}</p>
+                    </td>
+                    <td>
+                        <h6 className="text-muted"><i className="fa fa-circle text-c-green f-10 m-r-15"/>{invoice.invoiceDate}</h6>
+                    </td>
+                    <td>
+                        <h6 className="text-muted"><i className="fa fa-circle text-c-red f-10 m-r-15"/>{invoice.dueDate}</h6>
+                    </td>
+                    <td>
+                        <h6 className="text-muted">Work Status: &nbsp; 
+                        {
+                            invoice.workCompleted &&
+                            <span className="text-success">Completed</span>
+                        }
+                        {
+                            !invoice.workCompleted &&
+                            <span className="text-danger">Not Completed</span>
+                        }
+                        </h6>
+                    </td>
+                    <td>
+                        <h6 className="text-muted">{invoice.dueAmount} INR due</h6>
+                    </td>
+                    <td>
+                        <button style={{border: 0}} onClick={() => this.viewDetails(invoice)} className="label theme-bg2 text-white f-12">View Details</button>
+                        <button style={{border: 0}} onClick={() => this.updateWorkStatus(invoice.id)} className="label theme-bg text-white f-12">
                             {
-                                invoice.data.workCompleted &&
-                                <span className="text-success">Completed</span>
-                            }
-                            {
-                                !invoice.data.workCompleted &&
-                                <span className="text-danger">Not Completed</span>
-                            }
-                            </h6>
-                        </td>
-                        <td>
-                            <button style={{border: 0}} onClick={() => this.viewDetails(invoice)} className="label theme-bg text-white f-12">View Details</button>
-                            <button style={{border: 0}} onClick={() => this.updateWorkStatus(invoice.id)} className="label theme-bg text-white f-12">
-                            {
-                                !invoice.data.workCompleted &&
+                                !invoice.workCompleted &&
                                 "Update Progress"
                             }
                             {
-                                invoice.data.workCompleted &&
+                                invoice.workCompleted &&
                                 "Delete Progress"
                             }                            
-                            </button>
-                            <button style={{border: 0}} onClick={() => this.dialog.showAlert('Reminder sent!')} className="label theme-bg2 text-white f-12">Remind</button>
-                            <Dialog ref={(component) => { this.dialog = component }} />
-                        </td>
-                    </tr>
+                        </button>
+                        <button style={{border: 0}} onClick={() => {this.dialog.showAlert("Reminder sent!")}} className="label theme-bg text-white f-12">Remind</button>
+                        <Dialog ref={(component) => { this.dialog = component }} />
+                    </td>
+                </tr>
                 )
             }
         })
@@ -223,10 +200,10 @@ class ClientDashboard extends React.Component {
                     <Col md={12} xl={12}>
                         <div className="justify-content-center text-center"><img className="rounded-circle" style={{width: '140px'}} src={avatar2} alt="user"/></div>
                         <div className="mt-3 text-center">
-                            <h4 className="mb-0">{this.state.client.name}</h4> 
+                            <h4 className="mb-0">{this.state.client.company_name}</h4> 
                             <span className="text-muted d-block mb-2">{this.state.client.email}</span>
-                            <span className="text-muted d-block mb-2">{this.state.client.clientAddr}</span> 
-                            <h5 className="mb-3">Discount: {this.state.client.discount} %</h5> 
+                            <span className="text-muted d-block mb-2">{this.state.client.username}</span> 
+                            <h5 className="mb-3">Discount: {this.state.discount} %</h5> 
                             <span><RangeSlider value={this.state.discount} onChange={e=>this.setState({discount: e.target.value})}/></span>
                             <Button size='sm' onClick={() => {this.updateDiscount(this.state.discount)}}>Update Discount</Button>
                         </div>  
