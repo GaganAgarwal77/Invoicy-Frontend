@@ -7,7 +7,7 @@ export const initialProductLine: ProductLine = {
 }
 
 export const initialInvoice: Invoice = {
-  clientId:'1',
+  clientId:'',
   companyId:'1',
   companyName: '',
   companyAddr: '',
@@ -16,8 +16,8 @@ export const initialInvoice: Invoice = {
   clientAddr: '',
   clientEmail: '',
   invoiceId: '1',
-  invoiceDate: 'Jan 15, 2022',
-  dueDate: 'Feb 24, 2022',
+  invoiceDate: '2023-04-15',
+  dueDate: '2023-05-25',
   productLines: [
     {
       desc: 'Item 1',

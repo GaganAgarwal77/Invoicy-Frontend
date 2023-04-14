@@ -173,7 +173,7 @@ class Dashboard extends React.Component {
                         </h6>
                     </td>
                     <td>
-                        <h6 className="text-muted">{invoice.dueAmount} due</h6>
+                        <h6 className="text-muted">{invoice.dueAmount} INR due</h6>
                     </td>
                     <td>
                         <button style={{border: 0}} onClick={() => this.viewDetails(invoice)} className="label theme-bg2 text-white f-12">View Details</button>

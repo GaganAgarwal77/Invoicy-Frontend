@@ -14,8 +14,8 @@ import { Font } from '@react-pdf/renderer'
 import Download from './DownloadPDF'
 import format from 'date-fns/format'
 import { Text as PdfText } from '@react-pdf/renderer'
-import {loadAccount, getCompanyId, getAllClients, getCompanyById, getClientCompany,createInvoice, web3} from "../services/web3";
 import '../assets/invoice-scss/main.scss'
+import ApiService from '../services/ApiService'
 
 Font.register({
   family: 'Nunito',
@@ -37,7 +37,7 @@ const InvoicePage: FC<Props> = ({ data, pdfMode }) => {
   const [discount, setDiscount] = useState<number>()
   
   const [myClients, setMyClients] = useState<any[]>();
-  const dateFormat = 'MMM dd, yyyy'
+  const dateFormat = "yyyy-MM-dd"
   const invoiceDate = invoice.invoiceDate !== '' ? new Date(invoice.invoiceDate) : new Date()
   const invoiceDueDate =
     invoice.dueDate !== ''
@@ -48,39 +48,46 @@ const InvoicePage: FC<Props> = ({ data, pdfMode }) => {
     invoiceDueDate.setDate(invoiceDueDate.getDate() + 30)
   }
 
-  let allClients: any[] = [];
-
   const myAsyncFunction = async (): Promise<any> => {
-    const clients = await getAllClients();
-    const companyId = await getCompanyId();
-    const company = await getCompanyById(companyId);
-    const account = await loadAccount();
-    clients.forEach((element: any[]) => {
-      allClients.push({value:element[1], text:element[1], id:element[0], discount:element[3]});
-    });
-
+    let allClients: any[] = [];
+    let res1 = await ApiService.getAuth('/fetch-clients/', window.localStorage.getItem("token"));
+    const clients = res1.data;
+    console.log(clients)
+    const companyId = window.localStorage.getItem("user_id");
+    let res2 = await ApiService.getAuth(`/users/id/${companyId}/`, window.localStorage.getItem("token"));
+    const company = res2.data;
+    console.log(company)
     const newInvoice = { ...invoice }
-    newInvoice.companyName = company.name;
+    newInvoice.companyName = company.company_name;
     newInvoice.email = company.email;
-    newInvoice.companyId = companyId;
-    try {
-      newInvoice.clientAddr = allClients[0].value;
-      newInvoice.clientId = allClients[0].id;
-      newInvoice.discount = allClients[0].discount;
-      const clientCompany = await getClientCompany(companyId, newInvoice.clientId)
-      newInvoice.clientName = clientCompany.name;
-      newInvoice.clientEmail = clientCompany.email;
+    newInvoice.companyId = companyId || '';
+    await clients.forEach( async (client: any) => {
+      const clientID = client.client;
+      let res2 = await ApiService.getAuth(`/users/id/${clientID}/`, window.localStorage.getItem("token"));
+      const clientCompany = res2.data;
+      const data = {
+        value : client.client,
+        text: client.client,
+        id: client.client,
+        "clientId" : client.client,
+        "blocked" : client.blocked,
+        "discount" : client.discount,
+        "name" : clientCompany.company_name,
+        "email": clientCompany.email,
+        "username" : clientCompany.username,
     }
-    catch(e) {
-      console.log(e);
-      newInvoice.clientAddr = account;
-      newInvoice.clientId = "0";
-    }
-    newInvoice.companyAddr = account;
-
+      allClients.push(data);
+      newInvoice.clientAddr = '';
+      newInvoice.clientId = data.clientId;
+      newInvoice.discount = data.discount;
+      newInvoice.clientName = data.name;
+      newInvoice.clientEmail = data.email;
+      newInvoice.companyAddr = '';
+    });
+    console.log(allClients, newInvoice)
     // console.log(newInvoice)
-    setMyClients(allClients)
     setInvoice(newInvoice)
+    setMyClients(allClients)
   }
 
   const handleChange = async (name: keyof Invoice, value: string | number) => {
@@ -89,19 +96,21 @@ const InvoicePage: FC<Props> = ({ data, pdfMode }) => {
       const newInvoice = { ...invoice }
 
       if (typeof value === 'string') {
-        if(name === "clientAddr") {
+        if(name === "clientId") {
+          console.log(value)
           newInvoice[name] = value;
-          const clientCompanyId = await getCompanyId(value);
-          const clientCompany = await getCompanyById(clientCompanyId);
-          newInvoice["clientName"] = clientCompany.name;
+          const clientCompanyId = value;
+          let res2 = await ApiService.getAuth(`/users/id/${clientCompanyId}/`, window.localStorage.getItem("token"));
+          const clientCompany = res2.data;
+          newInvoice["clientName"] = clientCompany.company_name;
           newInvoice["clientEmail"] = clientCompany.email;
 
           let length = myClients ? myClients.length : 0
           for(var i = 0; i < length; i++) {
-            const address = myClients ? myClients[i].value : null;
-            if(address === value) {
+            const id = myClients ? myClients[i].clientId : null;
+            if(id == value) {
               newInvoice["discount"] = myClients ? myClients[i].discount : 0;
-              newInvoice["clientId"] = myClients ? myClients[i].id : 0;
+              newInvoice["clientId"] = myClients ? myClients[i].clientId : 0;
             }
           }          
         }
@@ -203,38 +212,35 @@ const InvoicePage: FC<Props> = ({ data, pdfMode }) => {
 
     let finalItems : any[] = []
     data.productLines.forEach((item:any) => {
-        let itemData = {...item}
-        itemData['price'] = web3.utils.toWei(item.price)
+        let itemData : any = {};
+        itemData['description'] = item.desc
+        itemData['quantity'] = item.qty
+        itemData['price'] = item.price
         itemData['discount'] = data.discount
         itemData['tax'] = data.tax
-        finalItems.push(Object.values(itemData));
+        finalItems.push(itemData);
     })
-
-    let paymentDetails = {    
-      "method": data.method, 
-      "network": data.network,
-      "totalAmount":web3.utils.toWei(data.totalAmount),
-      "dueAmount":web3.utils.toWei(data.dueAmount),
-      "advancePercent":data.advancePercent
-  }
-  let paymentArray =  Object.values(paymentDetails)
+    console.log(finalItems);
   let invoiceData =  {
-    "companyId": data.companyId,
-    "clientId": data.clientId,
-    "items" :finalItems,
-    "payment": paymentArray,
-    "workCompleted": false,
+    "client": data.clientId,
     "invoiceDate":data.invoiceDate,
     "dueDate": data.dueDate,
-    "uploadDocURI": data.uploadDocURI,
+    "totalAmount": data.totalAmount,
+    "advancePercent": data.advancePercent,
     "note": data.note,
+    "items" :finalItems,
   }
+  console.log(invoiceData);
 
-    let invoiceArray = Object.values(invoiceData)
-
-    let result = await createInvoice(invoiceArray)
-    window.alert('Invoice Created')
-    window.location.href = '/dashboard'
+  try{
+  let result = await ApiService.postAuth("/add-invoice/", invoiceData, window.localStorage.getItem("token"));
+  window.alert('Invoice Created')
+  window.location.href = '/dashboard'
+  }
+  catch(e) {
+    window.alert("Error...")
+    console.log(e)
+  }
   }
 
   return (
@@ -251,18 +257,6 @@ const InvoicePage: FC<Props> = ({ data, pdfMode }) => {
               value={invoice.companyName}
               pdfMode={pdfMode}
             />
-
-            {pdfMode ? (
-              <PdfText style={{fontSize:'10px'}}>{invoice.companyAddr}</PdfText>
-            ) : (
-              <input
-              type="text"
-              className={'input'}
-              value={invoice.companyAddr}
-              readOnly
-              style={{textOverflow:'ellipsis',width:'110%'}}
-            />
-            )}    
 
             <EditableInput
               placeholder="Email Address"
@@ -298,43 +292,23 @@ const InvoicePage: FC<Props> = ({ data, pdfMode }) => {
               value={invoice.clientName}
               pdfMode={pdfMode}
             />
+            {console.log(myClients, myClients?.map((client) => {return client.clientId}))}
             {pdfMode ? (
-              <PdfText style={{fontSize:'10px'}}>{invoice.clientAddr}</PdfText>
+              <PdfText style={{fontSize:'10px'}}>{invoice.clientId}</PdfText>
             ) : (
                   <EditableSelect
-                    options={myClients}
-                    value={invoice.clientAddr}
-                    onChange={(value) => handleChange('clientAddr', value)}
+                    placeholder="Your Client's ID"
+                    options = {myClients}
+                    value={invoice.clientId}
+                    onChange={(value) => handleChange('clientId', value)}
                     pdfMode={pdfMode}
                     />            
             )}
-
-
             <EditableInput
               placeholder="Email Address"
               value={invoice.clientEmail}
               pdfMode={pdfMode}
             />
-            {pdfMode ? (
-              <PdfText style={{fontSize:'14px'}}>{invoice.network}</PdfText>
-            ) : (
-                  <EditableSelect
-                    options={networkList}
-                    value={invoice.network}
-                    onChange={(value) => handleChange('network', value)}
-                    pdfMode={pdfMode}
-                    />            
-            )}
-            {pdfMode ? (
-              <PdfText style={{fontSize:'14px'}}>{invoice.method}</PdfText>
-            ) : (
-                  <EditableSelect
-                    options={methodList}
-                    value={invoice.method}
-                    onChange={(value) => handleChange('method', value)}
-                    pdfMode={pdfMode}
-                    />            
-            )}
           </View>
           
           <View className="w-45" pdfMode={pdfMode}>
@@ -421,7 +395,7 @@ const InvoicePage: FC<Props> = ({ data, pdfMode }) => {
               </View>
               <View className="w-60" pdfMode={pdfMode}>
               <Text className="dark w-auto" pdfMode={pdfMode}>
-              {'ETH ' + (typeof subTotal !== 'undefined' && typeof saleTax !== 'undefined'
+              {'INR ' + (typeof subTotal !== 'undefined' && typeof saleTax !== 'undefined'
                 ? (parseFloat(invoice.totalAmount) * (parseFloat(invoice.advancePercent)/100))
                 : 0
               ).toFixed(2)}
@@ -537,7 +511,7 @@ const InvoicePage: FC<Props> = ({ data, pdfMode }) => {
               </View>
               <View className="w-50 p-1" pdfMode={pdfMode}>
                 <Text className="right bold dark" pdfMode={pdfMode}>
-                  {'ETH '+subTotal?.toFixed(2)}
+                  {'INR '+subTotal?.toFixed(2)}
                 </Text>
               </View>
             </View>
@@ -558,7 +532,7 @@ const InvoicePage: FC<Props> = ({ data, pdfMode }) => {
               </View>
               <View className="w-50 p-1" pdfMode={pdfMode}>
                 <Text className="right bold dark" pdfMode={pdfMode}>
-                  {'ETH '+ saleTax?.toFixed(2)}
+                  {'INR '+ saleTax?.toFixed(2)}
                 </Text>
               </View>
             </View>
@@ -579,7 +553,7 @@ const InvoicePage: FC<Props> = ({ data, pdfMode }) => {
               </View>
               <View className="w-50 p-1" pdfMode={pdfMode}>
                 <Text className="right bold dark" pdfMode={pdfMode}>
-                  {'ETH '+discount?.toFixed(2)}
+                  {'INR '+discount?.toFixed(2)}
                 </Text>
               </View>
             </View>
@@ -593,7 +567,7 @@ const InvoicePage: FC<Props> = ({ data, pdfMode }) => {
                 </View>
               <View className="w-50 p-1" pdfMode={pdfMode}>
                 <Text className="right bold dark" pdfMode={pdfMode}>
-                  {'ETH '+(typeof subTotal !== 'undefined' && typeof saleTax !== 'undefined' && typeof discount !== 'undefined'
+                  {'INR '+(typeof subTotal !== 'undefined' && typeof saleTax !== 'undefined' && typeof discount !== 'undefined'
                     ? subTotal + saleTax - discount
                     : 0
                   ).toFixed(2)}
@@ -613,7 +587,7 @@ const InvoicePage: FC<Props> = ({ data, pdfMode }) => {
                   </View>
               <View className="w-50 p-1" pdfMode={pdfMode}>
                 <Text className="right bold dark" pdfMode={pdfMode}>
-                  {'ETH '+ parseFloat(invoice.dueAmount).toFixed(2)}
+                  {'INR '+ parseFloat(invoice.dueAmount).toFixed(2)}
                 </Text>
               </View>
           </View>
