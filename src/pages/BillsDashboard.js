@@ -2,33 +2,26 @@ import React from 'react';
 import {Row, Col, Card, Table} from 'react-bootstrap';
 import Aux from "../hoc/_Aux";
 import avatar2 from '../assets/images/user/avatar-2.jpg';
-import {web3, getAllBillsByCompany, getInvoiceDetails, payBill} from '../services/web3';
-import {loadWeb3, loadAccount, getCompanyId} from "../services/web3";
+import ApiService from '../services/ApiService';
 class BillsDashboard extends React.Component {
     constructor (props) {
         super(props);
-        this.state = {wallet: '', companyId: 0, invoices: []};
-        this.fetchAccount();
+        this.state = {wallet: '', companyId: window.localStorage.getItem("user_id"), invoices: []};
     }
-    async fetchAccount(){
-        await loadWeb3();
-        const account = await loadAccount();
-        this.setState({wallet: account});
-        const companyId = await getCompanyId();
-        if(companyId > 0) {
-            this.setState({companyId: companyId});
-        }
-        else{
-            this.props.history.push('/');
-        }
-    }
+
     async getBills() {
-        await this.fetchAccount();
         try{
-            const ids = await getAllBillsByCompany(this.state.companyId);
-            ids.forEach(async id => {
-                const data = await getInvoiceDetails(id);
-                const invoice = {'id': id, 'data': data}
+            let res3 = await ApiService.getAuth("/fetch-invoices/", window.localStorage.getItem("token"));
+            const invoices = res3.data;
+            console.log(invoices);
+            let res5 = await ApiService.getAuth(`/users/id/${this.state.companyId}/`, window.localStorage.getItem("token"));
+            let company = res5.data;
+            invoices.forEach(async invoice => {
+                const clentId = invoice.client
+                let res2 = await ApiService.getAuth(`/users/id/${clentId}/`, window.localStorage.getItem("token"));
+                const client = res2.data;
+                console.log(client);
+                invoice = {...invoice, 'clientName': client.company_name, 'clientEmail': client.email, 'companyName': company.company_name, 'companyEmail': company.email }
                 this.setState({
                     invoices:[...this.state.invoices, invoice]
                 });
@@ -43,21 +36,22 @@ class BillsDashboard extends React.Component {
     }  
     async payInvoice(invoice) {
         const invoiceId = invoice.id;
-        const advance =  parseInt(invoice.data.payment.advancePercent);
-        const workCompleted = invoice.data.workCompleted;
+        const advance =  parseInt(invoice.advancePercent);
+        const workCompleted = invoice.workCompleted;
         var amount;
         if(advance === 0 || advance === 100) {
-            amount = invoice.data.payment.dueAmount;
+            amount = invoice.dueAmount;
         }
         else {
             if(!workCompleted) {
-                amount = invoice.data.payment.dueAmount * (advance / 100);
+                amount = invoice.dueAmount * (advance / 100);
             }
             else {
-                amount = invoice.data.payment.dueAmount;
+                amount = invoice.dueAmount;
             }
         }
-        await payBill(invoiceId, amount);
+        window.alert("Invoice Paid")
+        // await payBill(invoiceId, amount);
     }
     viewDetails(invoice) {
         this.props.history.push({
@@ -71,33 +65,34 @@ class BillsDashboard extends React.Component {
         let pendingData  = []
         let totalMoneySpent = 0
         let totalMoneyDue = 0
+        console.log(invoices);
         invoices.forEach(invoice => {
-            if(invoice.data.isSettled){
+            if(invoice.dueAmount == 0){
                 settledData.push(
                     <tr className="unread" key = {invoice.id}>
                         <td><img className="rounded-circle" style={{width: '40px'}} src={avatar2} alt="activity-user"/></td>
                         <td>
-                            <h6 className="mb-1">{invoice.data.company.name}</h6>
-                            <p className="m-0">{invoice.data.company.email}</p>
+                            <h6 className="mb-1">{invoice.clientName}</h6>
+                            <p className="m-0">{invoice.clientEmail}</p>
                         </td>
                         <td>
-                            <h6 className="text-muted"><i className="fa fa-circle text-c-green f-10 m-r-15"/>{invoice.data.invoiceDate}</h6>
+                            <h6 className="text-muted"><i className="fa fa-circle text-c-green f-10 m-r-15"/>{invoice.invoiceDate}</h6>
                         </td>
                         <td>
-                            <h6 className="text-muted"><i className="fa fa-circle text-c-red f-10 m-r-15"/>{invoice.data.dueDate}</h6>
+                            <h6 className="text-muted"><i className="fa fa-circle text-c-red f-10 m-r-15"/>{invoice.dueDate}</h6>
                         </td>
     
                         <td>
-                            <h6 className="text-muted">{parseFloat(web3.utils.fromWei(invoice.data.payment.totalAmount)).toFixed(2)} ETH</h6>
+                            <h6 className="text-muted">{invoice.totalAmount} INR</h6>
                         </td>
                         <td>
                             <h6 className="text-muted">Work Status: &nbsp; 
                             {
-                                invoice.data.workCompleted &&
+                                invoice.workCompleted &&
                                 <span className="text-success">Completed</span>
                             }
                             {
-                                !invoice.data.workCompleted &&
+                                !invoice.workCompleted &&
                                 <span className="text-danger">Not Completed</span>
                             }
                             </h6>
@@ -107,36 +102,36 @@ class BillsDashboard extends React.Component {
                         </td>
                     </tr>
                 )
-                totalMoneySpent += parseFloat(web3.utils.fromWei(invoice.data.payment.totalAmount));
+                totalMoneySpent += invoice.totalAmount;
             }
             else{
             pendingData.push(
                 <tr className="unread" key = {invoice.id}>
                     <td><img className="rounded-circle" style={{width: '40px'}} src={avatar2} alt="activity-user"/></td>
                     <td>
-                        <h6 className="mb-1">{invoice.data.company.name}</h6>
-                        <p className="m-0">{invoice.data.company.email}</p>
+                        <h6 className="mb-1">{invoice.clientName}</h6>
+                        <p className="m-0">{invoice.clientEmail}</p>
                     </td>
                     <td>
-                        <h6 className="text-muted"><i className="fa fa-circle text-c-green f-10 m-r-15"/>{invoice.data.invoiceDate}</h6>
+                        <h6 className="text-muted"><i className="fa fa-circle text-c-green f-10 m-r-15"/>{invoice.invoiceDate}</h6>
                     </td>
                     <td>
-                        <h6 className="text-muted"><i className="fa fa-circle text-c-red f-10 m-r-15"/>{invoice.data.dueDate}</h6>
+                        <h6 className="text-muted"><i className="fa fa-circle text-c-red f-10 m-r-15"/>{invoice.dueDate}</h6>
                     </td>
                     <td>
-                        <h6 className="text-muted">{parseFloat(web3.utils.fromWei(invoice.data.payment.dueAmount)).toFixed(2)} ETH due</h6>
+                        <h6 className="text-muted">{invoice.dueAmount} INR due</h6>
                         <p className="m-0">
-                            Advance: {invoice.data.payment.advancePercent}%
+                            Advance: {invoice.advancePercent}%
                         </p>
                     </td>
                     <td>
                         <h6 className="text-muted">Work Status: &nbsp; 
                         {
-                            invoice.data.workCompleted &&
+                            invoice.workCompleted &&
                             <span className="text-success">Completed</span>
                         }
                         {
-                            !invoice.data.workCompleted &&
+                            !invoice.workCompleted &&
                             <span className="text-danger">Not Completed</span>
                         }
                         </h6>
@@ -147,7 +142,7 @@ class BillsDashboard extends React.Component {
                     </td>
                 </tr>
             )
-            totalMoneyDue += parseFloat(web3.utils.fromWei(invoice.data.payment.dueAmount));
+            totalMoneyDue +=invoice.dueAmount;
             }
         })
         var settledProgressBar = (settledData.length + pendingData.length) ? (settledData.length / (settledData.length + pendingData.length) * 100).toString() : "0";

@@ -1,32 +1,31 @@
 import React, { FC } from 'react'
 import { PDFViewer } from '@react-pdf/renderer'
 import InvoicePage from './InvoicePage'
-import { web3 } from '../services/web3'
-
 interface Props {
   location: any
 }
 
 
-
 const convertData:any = (input:any)=>{
-  const discount = input.data.items[0].discount;
-  const tax = input.data.items[0].tax;
-  input.data.items.forEach((item:any) => {
-    item['price'] = web3.utils.fromWei(item.price)
+  const discount = input.items[0].discount;
+  const tax = input.items[0].tax;
+  input.items.forEach((item:any) => {
+    item['price'] = item.price
     delete item['discount'];
     delete item['tax'];
   })
   const invoice = {
-    ...input.data,
-    ...input.data.payment,
-    companyName: input.data.company.name,
-    companyAddr: input.data.company.companyAddr,
-    email: input.data.company.email,
-    clientName: input.data.client.name,
-    clientAddr: input.data.client.companyAddr,
-    clientemail: input.data.client.email,
-    productLines: input.data.items,
+    ...input,
+    invoiceId: input.id,
+    companyName: input.companyName,
+    companyAddr: input.user,
+    companyId: input.user,
+    email: input.companyEmail,
+    clientName: input.clientName,
+    clientAddr: input.client,
+    clientId: input.client,
+    clientemail: input.clientEmail,
+    productLines: input.items,
     discount: discount,
     tax: tax,
   }
@@ -34,8 +33,8 @@ const convertData:any = (input:any)=>{
   delete invoice['company']
   delete invoice['client']
   delete invoice['items']
-  invoice['totalAmount'] = web3.utils.fromWei(invoice.totalAmount)
-  invoice['dueAmount'] = web3.utils.fromWei(invoice.dueAmount)
+  invoice['totalAmount'] = invoice.totalAmount
+  invoice['dueAmount'] = invoice.dueAmount
   return invoice;
 }
 
