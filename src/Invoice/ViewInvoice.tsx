@@ -11,6 +11,8 @@ const convertData:any = (input:any)=>{
   const tax = input.items[0].tax;
   input.items.forEach((item:any) => {
     item['price'] = item.price
+    item['desc'] = item.description
+    item['qty'] = item.quantity
     delete item['discount'];
     delete item['tax'];
   })
