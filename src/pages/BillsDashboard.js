@@ -11,12 +11,13 @@ class BillsDashboard extends React.Component {
 
     async getBills() {
         try{
-            let res3 = await ApiService.getAuth("/fetch-invoices/", window.localStorage.getItem("token"));
+            let res3 = await ApiService.getAuth("/fetch-bills", window.localStorage.getItem("token"));
             const invoices = res3.data;
             console.log(invoices);
             let res5 = await ApiService.getAuth(`/users/id/${this.state.companyId}/`, window.localStorage.getItem("token"));
             let company = res5.data;
             invoices.forEach(async invoice => {
+                if(invoice.client == this.state.companyId){
                 const clentId = invoice.client
                 let res2 = await ApiService.getAuth(`/users/id/${clentId}/`, window.localStorage.getItem("token"));
                 const client = res2.data;
@@ -25,6 +26,7 @@ class BillsDashboard extends React.Component {
                 this.setState({
                     invoices:[...this.state.invoices, invoice]
                 });
+            }
             })
         }
         catch(e) {
@@ -51,7 +53,15 @@ class BillsDashboard extends React.Component {
             }
         }
         window.alert("Invoice Paid")
-        // await payBill(invoiceId, amount);
+        const result = await ApiService.patchAuth(`/invoice/${invoiceId}/`, {dueAmount: amount}, window.localStorage.getItem("token"));
+        console.log(result)
+        if(result) {
+            this.dialog.showAlert('Success!');
+            window.location.reload();
+        }
+        else {
+            this.dialog.showAlert('Something went wrong!');
+        }
     }
     viewDetails(invoice) {
         this.props.history.push({

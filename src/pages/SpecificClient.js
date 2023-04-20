@@ -30,11 +30,14 @@ class ClientDashboard extends React.Component {
             const client = res2.data;
             let res3 = await ApiService.getAuth(`/client-invoice/${this.state.clientId}/`, window.localStorage.getItem("token"));
             const invoices = res3.data;
+            let res4 = await ApiService.getAuth(`/client/${this.state.clientId}/`, window.localStorage.getItem("token"));
+            const clientData = res4.data;
             console.log(invoices);
+            console.log(clientData);
             invoices.forEach(invoice => {
                 invoice = {...invoice, 'clientName': client.company_name, 'clientEmail': client.email }
                 this.setState({
-                    client: {...client, 'discount': 25, 'blocked': false},
+                    client: {...client, 'discount': clientData.discount, 'blocked': clientData.blocked},
                     invoices:[...this.state.invoices, invoice]
                 });
             })
@@ -48,35 +51,39 @@ class ClientDashboard extends React.Component {
     }  
 
     async updateDiscount(discount) {
-        // const result = await updateClientDiscount(this.state.companyId, this.clientId, discount);
-        // if(result) {
-            this.dialog.showAlert('Waiting');
-        //     this.setState({
-        //         client: {...this.state.client, 
-        //             discount: discount
-        //         }
-        //     });
-        // }
-        // else {
-        //     this.dialog.showAlert('Something went wrong!');
-        // }
+        let result = await ApiService.patchAuth(`/client/${this.state.clientId}/`,{discount: discount} , window.localStorage.getItem("token"));
+        console.log(result);
+        if(result) {
+            this.setState({
+                client: {...this.state.client, 
+                    discount: discount
+                }
+            });
+            this.dialog.showAlert('Success');
+        }
+        else {
+            this.dialog.showAlert('Something went wrong!');
+        }
     }
 
     async blockClient() {
-        // const result = await updateClientBlockedStatus(this.state.companyId, this.clientId);
-        // if(result) {
-            this.dialog.showAlert('Waiting');
-        //     this.props.history.push({
-        //         pathname: '/dashboard'
-        //     })
-        // }
-        // else {
-        //     this.dialog.showAlert('Something went wrong!');
-        // }
+        let result = await ApiService.patchAuth(`/client/${this.state.clientId}/`,{blocked: !this.state.client.blocked} , window.localStorage.getItem("token"));
+        console.log(result);
+        if(result) {
+            this.setState({
+                client: {...this.state.client, 
+                    blocked: !this.state.client.blocked
+                }
+            });
+            this.dialog.showAlert('Success');
+        }
+        else {
+            this.dialog.showAlert('Something went wrong!');
+        }
     }
 
     async updateWorkStatus(invoiceId) {
-        const result = await ApiService.patchAuth(`/invoice/${invoiceId}/`, {workCompleted: "true", note: "some note"}, window.localStorage.getItem("token"));
+        const result = await ApiService.patchAuth(`/invoice/${invoiceId}/`, {workCompleted: "true"}, window.localStorage.getItem("token"));
         console.log(result)
         if(result) {
             this.dialog.showAlert('Success!');
@@ -203,7 +210,7 @@ class ClientDashboard extends React.Component {
                             <h4 className="mb-0">{this.state.client.company_name}</h4> 
                             <span className="text-muted d-block mb-2">{this.state.client.email}</span>
                             <span className="text-muted d-block mb-2">{this.state.client.username}</span> 
-                            <h5 className="mb-3">Discount: {this.state.discount} %</h5> 
+                            <h5 className="mb-3">Discount: {this.state.client.discount} %</h5> 
                             <span><RangeSlider value={this.state.discount} onChange={e=>this.setState({discount: e.target.value})}/></span>
                             <Button size='sm' onClick={() => {this.updateDiscount(this.state.discount)}}>Update Discount</Button>
                         </div>  
@@ -241,7 +248,7 @@ class ClientDashboard extends React.Component {
                     </Col>
 
                     {
-                        !this.state.client.isBlocked &&
+                        !this.state.client.blocked &&
                         <Col md={12} xl={12}>
                         <div className="justify-content-center text-center">
                             <Button variant='danger' onClick={() => this.blockClient()}>Block Client</Button>
@@ -250,7 +257,7 @@ class ClientDashboard extends React.Component {
                         </Col>
                     }
                     {
-                        this.state.client.isBlocked &&
+                        this.state.client.blocked &&
                         <Col md={12} xl={12}>
                         <div className="justify-content-center text-center">
                             <Button variant='primary' onClick={() => this.blockClient()}>Unblock Client</Button>
