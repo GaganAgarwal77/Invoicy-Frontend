@@ -1,12 +1,10 @@
-version: "3.8"
+version: "1"
 
 services:
   app:
-    container_name: frontend
-    image: invoicy-frontend
+    container_name: invoicy-frontend
+    image: gaganagarwal77/invoicy-frontend
     build:
       context: .
-    volumes:
-      - ./src:/app/src
     ports:
       - 3000:80
