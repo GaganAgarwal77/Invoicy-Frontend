@@ -3,8 +3,5 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 COPY . .
-RUN npm build
-
-FROM nginx:alpine
-COPY build/ /usr/share/nginx/html
-EXPOSE 80
+CMD ["npm", "start"]
+EXPOSE 3000
