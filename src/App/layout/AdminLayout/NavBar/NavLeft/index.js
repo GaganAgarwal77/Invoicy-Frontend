@@ -12,7 +12,7 @@ class NavLeft extends Component {
 
     constructor(props){
         super(props);
-        this.state = {wallet: window.localStorage.getItem("token")};
+        this.state = {token: window.localStorage.getItem("token")};
     }
 
 
@@ -35,7 +35,7 @@ class NavLeft extends Component {
                 <ul className="navbar-nav mr-auto">
                     <li><a href={DEMO.BLANK_LINK} className="full-screen" onClick={this.props.onFullScreen}><i className={iconFullScreen.join(' ')} /></a></li>
                     <li className={navItemClass.join(' ')}>
-                        {this.state.wallet!=='' && 
+                        {this.state.token!=='' && 
                         <Dropdown alignRight={dropdownRightAlign}>
                             <i className="fa fa-circle text-c-green f-10"/>
                             <Dropdown.Toggle variant={'link'} id="dropdown-basic">
@@ -43,14 +43,10 @@ class NavLeft extends Component {
                             </Dropdown.Toggle>
                             <ul>
                                 <Dropdown.Menu>
-                                    <li><a className="dropdown-item" href={DEMO.BLANK_LINK}>{this.state.wallet}</a></li>
+                                    <li><a className="dropdown-item" href={DEMO.BLANK_LINK}>{this.state.token}</a></li>
                                 </Dropdown.Menu>
                             </ul>
                         </Dropdown>}
-                        {this.state.wallet==='' &&                          
-                            <p variant={'link'} id="dropdown-basic"> <i className="fa fa-circle text-c-red f-10 m-r-5"/>
-                                Connect Wallet
-                            </p>}
                     </li>
                     
                 </ul>

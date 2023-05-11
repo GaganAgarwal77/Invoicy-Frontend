@@ -8,7 +8,7 @@ import Dialog from 'react-bootstrap-dialog';
 class BillsDashboard extends React.Component {
     constructor (props) {
         super(props);
-        this.state = {wallet: '', companyId: window.localStorage.getItem("user_id"), invoices: []};
+        this.state = {token: '', companyId: window.localStorage.getItem("user_id"), invoices: []};
     }
 
     async getBills() {
