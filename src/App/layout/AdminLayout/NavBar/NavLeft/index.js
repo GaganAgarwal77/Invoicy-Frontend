@@ -39,7 +39,7 @@ class NavLeft extends Component {
                         <Dropdown alignRight={dropdownRightAlign}>
                             <i className="fa fa-circle text-c-green f-10"/>
                             <Dropdown.Toggle variant={'link'} id="dropdown-basic">
-                            Wallet Connected
+                            JWT Token
                             </Dropdown.Toggle>
                             <ul>
                                 <Dropdown.Menu>
