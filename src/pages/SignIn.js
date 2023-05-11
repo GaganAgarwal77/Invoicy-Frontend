@@ -4,7 +4,7 @@ import {NavLink} from 'react-router-dom';
 import '../assets/scss/style.scss';
 import Aux from "../hoc/_Aux";
 import Breadcrumb from "../App/layout/AdminLayout/Breadcrumb";
-
+import Dialog from 'react-bootstrap-dialog';
 import ApiService from '../services/ApiService';
 class SignUp extends React.Component {
     constructor (props) {
@@ -23,15 +23,15 @@ class SignUp extends React.Component {
             window.localStorage.setItem('token', res.data.token);
             window.localStorage.setItem('user_id', res.data.user_id);
             window.localStorage.setItem('username', res.data.username);
-            this.setState({ message: 'User logged in successfully.' });
+            this.dialog.showAlert('User logged in successfully.!');
             this.props.history.push('/dashboard');
         }).catch((error) => {
-            console.log(error.response)
+            console.log(error)
             if (error.response) {
-                this.setState({ errorMessage: error.response.data.message, id: null });
+                this.dialog.showAlert(error.response.data.non_field_errors);
             }
-            else if (error.request) console.log(error.request);
-            else console.log(error.message);
+            else if (error.request) this.dialog.showAlert(error.request);
+            else this.dialog.showAlert(error.message);
         });
     }
 
@@ -69,6 +69,7 @@ class SignUp extends React.Component {
                                 </div>
                                 <button className="btn btn-primary shadow-2 mb-4" onClick={this.signinHandler.bind(this)}>Sign in</button>
                                 <p className="mb-0 text-muted">Don't have an account? <NavLink to="/signup">Sign Up</NavLink></p>
+                                <Dialog ref={(component) => { this.dialog = component }} />
                             </div>
                         </div>
                     </div>

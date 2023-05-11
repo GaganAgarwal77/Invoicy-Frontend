@@ -3,6 +3,8 @@ import {Row, Col, Card, Table} from 'react-bootstrap';
 import Aux from "../hoc/_Aux";
 import avatar2 from '../assets/images/user/avatar-2.jpg';
 import ApiService from '../services/ApiService';
+import Dialog from 'react-bootstrap-dialog';
+
 class BillsDashboard extends React.Component {
     constructor (props) {
         super(props);
@@ -42,18 +44,17 @@ class BillsDashboard extends React.Component {
         const workCompleted = invoice.workCompleted;
         var amount;
         if(advance === 0 || advance === 100) {
-            amount = invoice.dueAmount;
+            amount = 0;
         }
         else {
             if(!workCompleted) {
-                amount = invoice.dueAmount * (advance / 100);
+                amount = invoice.totalAmount - invoice.totalAmount * (advance / 100);
             }
             else {
-                amount = invoice.dueAmount;
+                amount = 0;
             }
         }
-        window.alert("Invoice Paid")
-        const result = await ApiService.patchAuth(`/invoice/${invoiceId}/`, {dueAmount: amount}, window.localStorage.getItem("token"));
+        const result = await ApiService.patchAuth(`/bill/${invoiceId}/`, {dueAmount: amount}, window.localStorage.getItem("token"));
         console.log(result)
         if(result) {
             this.dialog.showAlert('Success!');
@@ -149,6 +150,7 @@ class BillsDashboard extends React.Component {
                     <td>
                         <button style={{border: 0}} onClick={() => this.viewDetails(invoice)} className="label theme-bg text-white f-12">View Details</button>
                         <button style={{border: 0}} onClick={() => this.payInvoice(invoice)} className="label theme-bg text-white f-12">Pay</button>
+                        <Dialog ref={(component) => { this.dialog = component }} />
                     </td>
                 </tr>
             )
