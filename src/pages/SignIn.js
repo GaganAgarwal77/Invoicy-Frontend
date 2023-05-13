@@ -6,13 +6,12 @@ import Aux from "../hoc/_Aux";
 import Breadcrumb from "../App/layout/AdminLayout/Breadcrumb";
 import Dialog from 'react-bootstrap-dialog';
 import ApiService from '../services/ApiService';
-class SignUp extends React.Component {
+class SignIn extends React.Component {
     constructor (props) {
         super(props);
         this.state = {password: '', username: ''};
     }
-    async signinHandler(event) {
-        event.preventDefault();
+    async signinHandler() {
         const data = {
             "username": this.state.username,
             "password": this.state.password
@@ -79,4 +78,4 @@ class SignUp extends React.Component {
     }
 }
 
-export default SignUp;
+export default SignIn;
