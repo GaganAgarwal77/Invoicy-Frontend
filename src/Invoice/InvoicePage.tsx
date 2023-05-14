@@ -287,11 +287,6 @@ const InvoicePage: FC<Props> = ({ data, pdfMode }) => {
             ) : (
               <PdfText style={{fontSize:'16px',fontWeight:'bold'}}>Bill To:</PdfText>
             )}    
-            <EditableInput
-              placeholder="Your Client's Name"
-              value={invoice.clientName}
-              pdfMode={pdfMode}
-            />
             {console.log(myClients, myClients?.map((client) => {return client.clientId}))}
             {pdfMode ? (
               <PdfText style={{fontSize:'10px'}}>{invoice.clientId}</PdfText>
@@ -304,6 +299,12 @@ const InvoicePage: FC<Props> = ({ data, pdfMode }) => {
                     pdfMode={pdfMode}
                     />            
             )}
+            <EditableInput
+              placeholder="Your Client's Name"
+              value={invoice.clientName}
+              pdfMode={pdfMode}
+            />
+
             <EditableInput
               placeholder="Email Address"
               value={invoice.clientEmail}

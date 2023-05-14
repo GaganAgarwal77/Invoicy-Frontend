@@ -1,8 +1,8 @@
 export const networkList = [
-    { value: 'Ethereum', text: 'Ethereum' },
-    { value: 'Polygon', text: 'Polygon'},
+    { value: 'Razorpay', text: 'Razorpay' },
+    { value: 'PayU', text: 'PayU'},
 ]
 export const methodList = [
-    { value: 'ETH', text: 'ETH'},
-    { value: 'MATIC', text: 'MATIC'},
+    { value: 'UPI', text: 'UPI'},
+    { value: 'CARD', text: 'CARD'},
 ]

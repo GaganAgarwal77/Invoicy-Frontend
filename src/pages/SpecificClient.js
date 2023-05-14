@@ -38,7 +38,8 @@ class ClientDashboard extends React.Component {
                 invoice = {...invoice, 'clientName': client.company_name, 'clientEmail': client.email }
                 this.setState({
                     client: {...client, 'discount': clientData.discount, 'blocked': clientData.blocked},
-                    invoices:[...this.state.invoices, invoice]
+                    invoices:[...this.state.invoices, invoice],
+                    discount: clientData.discount,
                 });
             })
         }catch(e){
@@ -208,7 +209,7 @@ class ClientDashboard extends React.Component {
                         <div className="justify-content-center text-center"><img className="rounded-circle" style={{width: '140px'}} src={avatar2} alt="user"/></div>
                         <div className="mt-3 text-center">
                             <h4 className="mb-0">{this.state.client.company_name}</h4> 
-                            <span className="text-muted d-block mb-2">{this.state.client.email}</span>
+                            <span className="text-muted d-block ">{this.state.client.email}</span>
                             <span className="text-muted d-block mb-2">{this.state.client.username}</span> 
                             <h5 className="mb-3">Discount: {this.state.client.discount} %</h5> 
                             <span><RangeSlider value={this.state.discount} onChange={e=>this.setState({discount: e.target.value})}/></span>

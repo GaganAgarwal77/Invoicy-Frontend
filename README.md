@@ -12,12 +12,11 @@
 
 ## Inspiration
 
-We wanted to build an app in the field of Finance. With the current growth of crypto , we believe that soon more people would need to use such Invoice Management Tools, and hence we wanted to take up this challenge.
-
+We wanted to build an app in the field of Finance. We believe that soon more people would need to use such Invoice Management Tools, and hence we wanted to take up this challenge.
 
 ## What it does
 
-Our project is an all-in-one platform to manage your invoices. You can create a professional crypto invoice in minutes or pay it in a few clicks. We have created the best user experience with features such as real-time status updates, Multi-level payment model and invoice management.
+Our project is an all-in-one platform to manage your invoices. You can create a professional invoice in minutes or pay it in a few clicks. We have created the best user experience with features such as real-time status updates, Multi-level payment model and invoice management.
 
 Our app allows users to:
 
@@ -56,11 +55,9 @@ Our app allows users to:
 
 We started off the project by working on the solidity backend and creating the react frontend parallelly. We implemented features such as Create Company, Add Client and Create Invoice first. We then went on to add the other features.
 
-We worked on the react frontend to meet our needs, we then made connection in the frontend with the backend by writing web3.js code.
+We worked on the react frontend to meet our needs, we then made connection in the frontend with the backend by making axios rest api calls.
 
-We then added new features parallely, that is, we would add a function in the solidity backend, add it in the web3.js code and then invoke it from the frontend.
-
-Once our project was ready, we deployed the backend on Polygon Testnet and the frontend on Netlify.
+We then added new features parallely, that is, we would add a function in the backend, and then invoke it from the frontend using axios api calls.
 
 ## Challenges we ran into 
 
@@ -79,28 +76,16 @@ This was the first time for us buidling a DeFi App and it was a great learning e
 We are very interested to take Invoicy to the next level and the following are our current plans:
 
 - Implement a realtime chat system for companies to talk to clients.
-- Give an option to convert settled Invoices into NFTs for the company.
 
 ## Built with
 
 - React
-- Solidity
+- Django
 - Javascript and Typescript
 - Scss
 - Github
-- Netlify
 
 ## Try it out
 
 - [Website](https://invoicy-dapp.netlify.app/)
 - [Demo]()
-
-## Important note
-
-To run the website please login to your metamask or portis account and use the following network:
-
-- Network Name: Mumbai Testnet
-- RPC URL: https://rpc-mumbai.maticvigil.com/
-- Chain ID: 80001
-
-Reload the website after connecting the metamask wallet.

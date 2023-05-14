@@ -212,7 +212,7 @@ class BillsDashboard extends React.Component {
                                 <h6 className='mb-4'>Total Money Sent</h6>
                                 <div className="row d-flex align-items-center">
                                     <div className="col-9">
-                                        <h3 className="f-w-300 d-flex align-items-center m-b-0"><i className="feather icon-arrow-up text-c-green f-30 m-r-5"/> {parseFloat(totalMoneySpent).toFixed(2)} ETH</h3>
+                                        <h3 className="f-w-300 d-flex align-items-center m-b-0"><i className="feather icon-arrow-up text-c-green f-30 m-r-5"/> {parseFloat(totalMoneySpent).toFixed(2)} INR</h3>
                                     </div>
 
                                     <div className="col-3 text-right">
@@ -266,7 +266,7 @@ class BillsDashboard extends React.Component {
                                         <p className="m-0">Facebook</p>
                                     </div>
                                     <div className="col text-right">
-                                        <h4><i class="fab fa-ethereum"></i> 10</h4>
+                                        <h4><i class="fas fa-dollar-sign"></i> 1000</h4>
                                         <p className="text-c-green mb-0"><span className="text-muted">Total Amount to Pay</span></p>
                                     </div>
                                 </div>
@@ -274,7 +274,7 @@ class BillsDashboard extends React.Component {
                             <Card.Body>
                                 <div className="row align-items-center justify-content-center card-active">
                                     <div className="col-6">
-                                        <h6 className="text-center m-b-10"><span className="text-muted m-r-5">Paid:</span> <i class="fab fa-ethereum"></i> 5</h6>
+                                        <h6 className="text-center m-b-10"><span className="text-muted m-r-5">Paid:</span> <i class="fas fa-dollar-sign"></i> 500</h6>
                                         <div className="progress">
                                             <div className="progress-bar progress-c-theme" role="progressbar" style={{width: '50%', height: '6px'}} aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"/>
                                         </div>
@@ -298,7 +298,7 @@ class BillsDashboard extends React.Component {
                                         <p className="m-0">Amazon</p>
                                     </div>
                                     <div className="col text-right">
-                                        <h4><i class="fab fa-ethereum"></i> 5</h4>
+                                        <h4><i class="fas fa-dollar-sign"></i> 500</h4>
                                         <p className="text-c-green mb-0"><span className="text-muted">Total Amount to Pay</span></p>
                                     </div>
                                 </div>
@@ -306,7 +306,7 @@ class BillsDashboard extends React.Component {
                             <Card.Body>
                                 <div className="row align-items-center justify-content-center card-active">
                                     <div className="col-6">
-                                        <h6 className="text-center m-b-10"><span className="text-muted m-r-5">Paid:</span> <i class="fab fa-ethereum"></i> 0</h6>
+                                        <h6 className="text-center m-b-10"><span className="text-muted m-r-5">Paid:</span> <i class="fas fa-dollar-sign"></i> 0</h6>
                                         <div className="progress">
                                             <div className="progress-bar progress-c-theme" role="progressbar" style={{width: '1%', height: '6px'}} aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"/>
                                         </div>
@@ -330,7 +330,7 @@ class BillsDashboard extends React.Component {
                                         <p className="m-0">Google</p>
                                     </div>
                                     <div className="col text-right">
-                                        <h4><i class="fab fa-ethereum"></i> 3</h4>
+                                        <h4><i class="fas fa-dollar-sign"></i> 3000</h4>
                                         <p className="text-c-green mb-0"><span className="text-muted">Total Amount to Pay</span></p>
                                     </div>
                                 </div>
@@ -338,7 +338,7 @@ class BillsDashboard extends React.Component {
                             <Card.Body>
                                 <div className="row align-items-center justify-content-center card-active">
                                     <div className="col-6">
-                                        <h6 className="text-center m-b-10"><span className="text-muted m-r-5">Paid:</span> <i class="fab fa-ethereum"></i> 1.2</h6>
+                                        <h6 className="text-center m-b-10"><span className="text-muted m-r-5">Paid:</span> <i class="fas fa-dollar-sign"></i> 1200</h6>
                                         <div className="progress">
                                             <div className="progress-bar progress-c-theme" role="progressbar" style={{width: '40%', height: '6px'}} aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"/>
                                         </div>

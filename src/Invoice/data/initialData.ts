@@ -31,8 +31,8 @@ export const initialInvoice: Invoice = {
   dueAmount: '18.00',
   discount: '20',
   tax: '10',
-  method: "ETH",
-  network: "Ethereum",
+  method: "UPI",
+  network: "Razorpay",
 
   workCompleted:"false",
   isSettled: "false",
