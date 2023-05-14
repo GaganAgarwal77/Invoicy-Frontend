@@ -10,6 +10,7 @@ class SignUp extends React.Component {
     constructor (props) {
         super(props);
         this.state = {email: '', name: '', password: '', username: ''};
+        this.signupHandler = this.signupHandler.bind(this);
     }
     async signupHandler(event) {
         event.preventDefault();
@@ -80,7 +81,7 @@ class SignUp extends React.Component {
                                             <label htmlFor="checkbox-fill-2" className="cr">Checkbox </label>
                                     </div>
                                 </div> */}
-                                <button className="btn btn-primary shadow-2 mb-4" onClick={this.signupHandler.bind(this)}>Sign up</button>
+                                <button className="btn btn-primary shadow-2 mb-4" onClick={(e) => this.signupHandler(e)}>Sign up</button>
                                 <p className="mb-0 text-muted">Already have an account? <NavLink to="/signin">Login</NavLink></p>
                                 <Dialog ref={(component) => { this.dialog = component }} />
                             </div>

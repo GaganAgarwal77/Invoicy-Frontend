@@ -8,8 +8,6 @@
 
 `npm install --legacy-peer-deps`
 
-`cp .env.example .env`
-
 `npm start`
 
 ## Inspiration
