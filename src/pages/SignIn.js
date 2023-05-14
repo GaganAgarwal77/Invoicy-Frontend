@@ -10,8 +10,10 @@ class SignIn extends React.Component {
     constructor (props) {
         super(props);
         this.state = {password: '', username: ''};
+        this.signinHandler = this.signinHandler.bind(this);
     }
-    async signinHandler() {
+    async signinHandler(event) {
+        event.preventDefault();
         const data = {
             "username": this.state.username,
             "password": this.state.password
@@ -66,7 +68,7 @@ class SignIn extends React.Component {
                                 <div className="input-group mb-4">
                                     <input type="password" className="form-control" placeholder="Password"  value={this.state.password} onChange={e => {this.handleChange("password", e.target.value)}}/>
                                 </div>
-                                <button className="btn btn-primary shadow-2 mb-4" onClick={this.signinHandler.bind(this)}>Sign in</button>
+                                <button className="btn btn-primary shadow-2 mb-4" onClick={(e) => this.signinHandler(e)}>Sign in</button>
                                 <p className="mb-0 text-muted">Don't have an account? <NavLink to="/signup">Sign Up</NavLink></p>
                                 <Dialog ref={(component) => { this.dialog = component }} />
                             </div>

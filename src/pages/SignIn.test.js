@@ -4,11 +4,9 @@ import SignIn from './SignIn';
 
 describe('SignIn', () => {
   let wrapper;
-  const signinHandlerMock = jest.fn(); // Define the mock function outside of beforeEach()
   beforeEach(() => {
-    wrapper = shallow(<SignIn signinHandler={signinHandlerMock} />);
+    wrapper = shallow(<SignIn/>);
   });
-
   it('renders the component', () => {
     expect(wrapper.find('.auth-wrapper')).toHaveLength(1);
   });
@@ -26,8 +24,9 @@ describe('SignIn', () => {
   });
 
   it('calls the signinHandler function when the Sign in button is clicked', () => {
+    const signinHandlerSpy = jest.spyOn(wrapper.instance(), 'signinHandler');
     const signinButton = wrapper.find('button');
     signinButton.simulate('click');
-    expect(signinHandlerMock).toHaveBeenCalled();
+    expect(signinHandlerSpy).toHaveBeenCalled();
   });
 });
