@@ -23,6 +23,7 @@ class SignIn extends React.Component {
             window.localStorage.setItem('token', res.data.token);
             window.localStorage.setItem('user_id', res.data.user_id);
             window.localStorage.setItem('username', res.data.username);
+            window.localStorage.setItem('company_name', res.data.company_name);
             this.dialog.showAlert('User logged in successfully.!');
             this.props.history.push('/dashboard');
         }).catch((error) => {

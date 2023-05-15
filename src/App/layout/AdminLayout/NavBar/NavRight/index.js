@@ -90,7 +90,7 @@ class NavRight extends Component {
                             </Dropdown.Toggle>
                             <Dropdown.Menu alignRight className="profile-notification">
                                 <div className="pro-head">
-                                    <img src={Avatar1} className="img-radius" alt="User Profile"/>
+                                    <img src={Avatar2} className="img-radius" alt="User Profile"/>
                                     <span>{window.localStorage.getItem('company_name')}</span>
                                     <a href='#' onClick={() => {this.logout()}} className="dud-logout" title="Logout">
                                         <i className="feather icon-log-out"/>
