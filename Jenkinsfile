@@ -14,10 +14,18 @@ pipeline {
                 git branch: 'main', credentialsId: '20323', url: 'https://github.com/GaganAgarwal77/Invoicy-Frontend/'
             }
         }
+        stage('Setup nvm') {
+            steps {
+                nvm("v14.17.3") {
+                    sh '''
+                        node -v
+                    '''
+                }
+            }
+        }
         stage('Install node package modules') {
             steps {
                 sh '''
-                    nvm use v14
                     npm install
                 '''
             }
