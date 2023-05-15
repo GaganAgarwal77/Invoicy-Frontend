@@ -42,7 +42,6 @@ const convertData:any = (input:any)=>{
 
 const ViewInvoice: FC<Props> = (props) => {
   let data = convertData(props.location.state.invoice);
-
   return (
       <div >
         <PDFViewer style={{marginLeft:"25%",width:"50%",height:"140vh"}}>

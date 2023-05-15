@@ -177,7 +177,7 @@ const InvoicePage: FC<Props> = ({ data, pdfMode }) => {
     return amount.toFixed(2)
   }
   useEffect (() => {
-    myAsyncFunction()
+    if(!pdfMode) myAsyncFunction()
   },[])
   useEffect(() => {
     let subTotal = 0

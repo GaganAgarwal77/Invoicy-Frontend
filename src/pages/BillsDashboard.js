@@ -20,7 +20,6 @@ class BillsDashboard extends React.Component {
             let client = res5.data;
             invoices.forEach(async invoice => {
                 if(invoice.client == this.state.clientId){
-                const clentId = invoice.client
                 const companyId = invoice.user
                 let res2 = await ApiService.getAuth(`/users/id/${companyId}/`, window.localStorage.getItem("token"));
                 const company = res2.data;
@@ -66,6 +65,7 @@ class BillsDashboard extends React.Component {
         }
     }
     viewDetails(invoice) {
+        console.log(invoice)
         this.props.history.push({
             pathname: '/view-invoice/',
             state: { invoice: invoice }
