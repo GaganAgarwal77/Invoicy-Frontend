@@ -8,7 +8,7 @@ import Dialog from 'react-bootstrap-dialog';
 class BillsDashboard extends React.Component {
     constructor (props) {
         super(props);
-        this.state = {token: '', companyId: window.localStorage.getItem("user_id"), invoices: []};
+        this.state = {token: '', clientId: window.localStorage.getItem("user_id"), invoices: []};
     }
 
     async getBills() {
@@ -16,14 +16,15 @@ class BillsDashboard extends React.Component {
             let res3 = await ApiService.getAuth("/fetch-bills", window.localStorage.getItem("token"));
             const invoices = res3.data;
             console.log(invoices);
-            let res5 = await ApiService.getAuth(`/users/id/${this.state.companyId}/`, window.localStorage.getItem("token"));
-            let company = res5.data;
+            let res5 = await ApiService.getAuth(`/users/id/${this.state.clientId}/`, window.localStorage.getItem("token"));
+            let client = res5.data;
             invoices.forEach(async invoice => {
-                if(invoice.client == this.state.companyId){
+                if(invoice.client == this.state.clientId){
                 const clentId = invoice.client
-                let res2 = await ApiService.getAuth(`/users/id/${clentId}/`, window.localStorage.getItem("token"));
-                const client = res2.data;
-                console.log(client);
+                const companyId = invoice.user
+                let res2 = await ApiService.getAuth(`/users/id/${companyId}/`, window.localStorage.getItem("token"));
+                const company = res2.data;
+                console.log(company);
                 invoice = {...invoice, 'clientName': client.company_name, 'clientEmail': client.email, 'companyName': company.company_name, 'companyEmail': company.email }
                 this.setState({
                     invoices:[...this.state.invoices, invoice]
@@ -83,8 +84,8 @@ class BillsDashboard extends React.Component {
                     <tr className="unread" key = {invoice.id}>
                         <td><img className="rounded-circle" style={{width: '40px'}} src={avatar2} alt="activity-user"/></td>
                         <td>
-                            <h6 className="mb-1">{invoice.clientName}</h6>
-                            <p className="m-0">{invoice.clientEmail}</p>
+                            <h6 className="mb-1">{invoice.companyName}</h6>
+                            <p className="m-0">{invoice.companyEmail}</p>
                         </td>
                         <td>
                             <h6 className="text-muted"><i className="fa fa-circle text-c-green f-10 m-r-15"/>{invoice.invoiceDate}</h6>
@@ -120,8 +121,8 @@ class BillsDashboard extends React.Component {
                 <tr className="unread" key = {invoice.id}>
                     <td><img className="rounded-circle" style={{width: '40px'}} src={avatar2} alt="activity-user"/></td>
                     <td>
-                        <h6 className="mb-1">{invoice.clientName}</h6>
-                        <p className="m-0">{invoice.clientEmail}</p>
+                        <h6 className="mb-1">{invoice.companyName}</h6>
+                        <p className="m-0">{invoice.companyEmail}</p>
                     </td>
                     <td>
                         <h6 className="text-muted"><i className="fa fa-circle text-c-green f-10 m-r-15"/>{invoice.invoiceDate}</h6>
