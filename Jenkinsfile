@@ -16,17 +16,17 @@ pipeline {
         }
         stage('Install node package modules') {
             steps {
-                sh "
+                sh '''
                     nvm use v14
                     npm install
-                "
+                '''
             }
         }
         stage('Run tests') {
             steps {
-                sh "
+                sh '''
                     npm test
-                "
+                '''
             }
         }
         stage('Docker Image Build') {
