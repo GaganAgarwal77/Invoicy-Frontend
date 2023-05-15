@@ -7,11 +7,19 @@ import DEMO from "../../../../../store/constant";
 import Avatar1 from '../../../../../assets/images/user/avatar-1.jpg';
 import Avatar2 from '../../../../../assets/images/user/avatar-2.jpg';
 import Avatar3 from '../../../../../assets/images/user/avatar-3.jpg';
+import ApiService from '../../../../../services/ApiService';
 
 class NavRight extends Component {
     state = {
         listOpen: false
     };
+
+    async logout() { 
+        const result = await ApiService.getAuth("/logout/", window.localStorage.getItem("token"))
+        console.log(result)
+        window.localStorage.removeItem("token")
+        window.location.href = "/signin"
+    }
 
     render() {
 
@@ -83,8 +91,8 @@ class NavRight extends Component {
                             <Dropdown.Menu alignRight className="profile-notification">
                                 <div className="pro-head">
                                     <img src={Avatar1} className="img-radius" alt="User Profile"/>
-                                    <span>My Company</span>
-                                    <a href={'/'} className="dud-logout" title="Logout">
+                                    <span>{window.localStorage.getItem('company_name')}</span>
+                                    <a href='#' onClick={() => {this.logout()}} className="dud-logout" title="Logout">
                                         <i className="feather icon-log-out"/>
                                     </a>
                                 </div>

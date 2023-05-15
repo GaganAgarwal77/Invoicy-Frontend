@@ -32,16 +32,19 @@ class ClientDashboard extends React.Component {
             const invoices = res3.data;
             let res4 = await ApiService.getAuth(`/client/${this.state.clientId}/`, window.localStorage.getItem("token"));
             const clientData = res4.data;
+            console.log(client);
             console.log(invoices);
             console.log(clientData);
+            let clientInvoices = []
             invoices.forEach(invoice => {
                 invoice = {...invoice, 'clientName': client.company_name, 'clientEmail': client.email }
-                this.setState({
-                    client: {...client, 'discount': clientData.discount, 'blocked': clientData.blocked},
-                    invoices:[...this.state.invoices, invoice],
-                    discount: clientData.discount,
-                });
+                clientInvoices = [...clientInvoices, invoice]
             })
+            this.setState({
+                client: {...client, 'discount': clientData.discount, 'blocked': clientData.blocked},
+                invoices: clientInvoices,
+                discount: clientData.discount,
+            });
         }catch(e){
                 console.log(e);
             }
@@ -89,6 +92,17 @@ class ClientDashboard extends React.Component {
         if(result) {
             this.dialog.showAlert('Success!');
             window.location.reload();
+        }
+        else {
+            this.dialog.showAlert('Something went wrong!');
+        }
+    }
+
+    async remindClient(invoiceId) { 
+        const result = await ApiService.postAuth(`/reminder/invoice/`, {id:invoiceId}, window.localStorage.getItem("token"));
+        console.log(result)
+        if(result) {
+            this.dialog.showAlert('Reminder Sent Successfully!');
         }
         else {
             this.dialog.showAlert('Something went wrong!');
@@ -193,7 +207,7 @@ class ClientDashboard extends React.Component {
                                 "Delete Progress"
                             }                            
                         </button>
-                        <button style={{border: 0}} onClick={() => {this.dialog.showAlert("Reminder sent!")}} className="label theme-bg text-white f-12">Remind</button>
+                        <button style={{border: 0}} onClick={() => this.remindClient(invoice.id)} className="label theme-bg text-white f-12">Remind</button>
                         <Dialog ref={(component) => { this.dialog = component }} />
                     </td>
                 </tr>

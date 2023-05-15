@@ -138,6 +138,18 @@ class Dashboard extends React.Component {
             this.dialog.showAlert('Something went wrong!');
         }
     }
+
+    async remindClient(invoiceId) { 
+        const result = await ApiService.postAuth(`/reminder/invoice/`, {id:invoiceId}, window.localStorage.getItem("token"));
+        console.log(result)
+        if(result) {
+            this.dialog.showAlert('Reminder Sent Successfully!');
+        }
+        else {
+            this.dialog.showAlert('Something went wrong!');
+        }
+    }
+
     render() {       
         let topPendingInvoices = [];
         let clients = [];
@@ -187,7 +199,7 @@ class Dashboard extends React.Component {
                                 "Delete Progress"
                             }                            
                         </button>
-                        <button style={{border: 0}} onClick={() => {this.dialog.showAlert("Reminder sent!")}} className="label theme-bg text-white f-12">Remind</button>
+                        <button style={{border: 0}} onClick={() => this.remindClient(invoice.id)} className="label theme-bg text-white f-12">Remind</button>
                         <Dialog ref={(component) => { this.dialog = component }} />
                     </td>
                 </tr>

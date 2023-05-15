@@ -13,7 +13,6 @@ class SignIn extends React.Component {
         this.signinHandler = this.signinHandler.bind(this);
     }
     async signinHandler(event) {
-        event.preventDefault();
         const data = {
             "username": this.state.username,
             "password": this.state.password

@@ -35,21 +35,6 @@ export default {
                     icon: 'feather icon-file-plus',
                 }
             ]
-        },
-        {
-            id: 'account',
-            title: 'Account',
-            type: 'group',
-            icon: 'icon-navigation',
-            children: [
-                {
-                    id: 'logout',
-                    title: 'Logout',
-                    type: 'item',
-                    url: '/logout/',
-                    icon: 'feather icon-log-out',
-                }
-            ]
         }
     ]
 }
