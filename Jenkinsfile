@@ -25,16 +25,20 @@ pipeline {
         }
         stage('Install node package modules') {
             steps {
-                sh '''
-                    npm install
-                '''
+                nvm("v14.17.3") {
+                    sh '''
+                        npm install
+                    '''
+                }
             }
         }
         stage('Run tests') {
             steps {
-                sh '''
-                    npm test
-                '''
+                nvm("v14.17.3") {
+                    sh '''
+                        npm test
+                    '''
+                }
             }
         }
         stage('Docker Image Build') {
